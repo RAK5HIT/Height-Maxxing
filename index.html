@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height Tracker & Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        canvas {
+            margin-top: 20px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Height Tracker</h2>
+        <input type="number" id="heightInput" placeholder="Enter height in cm" />
+        <button onclick="logHeight()">Log Height</button>
+        <ul id="heightList"></ul>
+        <canvas id="heightChart"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let heightData = JSON.parse(localStorage.getItem('heights')) || [];
+        const heightList = document.getElementById("heightList");
+        const ctx = document.getElementById("heightChart").getContext("2d");
+        
+        function logHeight() {
+            let height = document.getElementById("heightInput").value;
+            if (height) {
+                let entry = { date: new Date().toLocaleDateString(), height: parseInt(height) };
+                heightData.push(entry);
+                localStorage.setItem('heights', JSON.stringify(heightData));
+                displayHeights();
+                updateChart();
+            }
+        }
+        
+        function displayHeights() {
+            heightList.innerHTML = "";
+            heightData.forEach(entry => {
+                let li = document.createElement("li");
+                li.textContent = `${entry.date}: ${entry.height} cm`;
+                heightList.appendChild(li);
+            });
+        }
+        
+        function updateChart() {
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: heightData.map(e => e.date),
+                    datasets: [{
+                        label: "Height Progression",
+                        data: heightData.map(e => e.height),
+                        borderColor: "#28a745",
+                        fill: false
+                    }]
+                }
+            });
+        }
+        
+        displayHeights();
+        updateChart();
+    </script>
+</body>
+</html>
